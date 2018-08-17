@@ -7,6 +7,7 @@ RUN mkdir -p /tensorflow/models
 
 COPY frozen_inference_graph_face.pb /server/frozen_inference_graph_face.pb
 COPY face_label_map.pbtxt /server/face_label_map.pbtxt
+COPY server.py /server/server.py
 RUN apt-get install -y git python-pip
 
 RUN pip install tensorflow==1.4
@@ -28,7 +29,10 @@ RUN jupyter notebook --generate-config --allow-root
 RUN echo "c.NotebookApp.password = u'sha1:6a3f528eec40:6e896b6e4828f525a6e20e5411cd1c8075d68619'" >> /root/.jupyter/jupyter_notebook_config.py
 
 EXPOSE 8888
-EXPOSE 9999
-##change to point to server directory and check the object recognition api can be called from this location.
+#EXPOSE 9999
 
-CMD ["jupyter", "notebook", "--allow-root", "--notebook-dir=/server", "--ip='*'", "--port=8888", "--no-browser"]
+#CMD ["jupyter", "notebook", "--allow-root", "--notebook-dir=/server", "--ip='*'", "--port=8888", "--no-browser"]
+
+WORKDIR /server
+
+CMD ["python", "app.py"]
