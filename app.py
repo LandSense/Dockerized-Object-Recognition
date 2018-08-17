@@ -77,11 +77,11 @@ def upload_file():
 
 	# the array based representation of the image will be used later in order to prepare the
 	# result image with boxes and labels on it.
-    image_np = load_image_into_numpy_array(image)
+    image_np = main.load_image_into_numpy_array(image)
 	# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
 	# Actual detection.
-    output_dict = run_inference_for_single_image(image_np, detection_graph)
+    output_dict = main.run_inference_for_single_image(image_np, detection_graph)
 	# Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
 		image_np,

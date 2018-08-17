@@ -32,10 +32,10 @@ EXPOSE 8888
 
 WORKDIR /server
 
-RUN git config --global user.email "t.brown@helyx.co.uk"
+RUN git config --global user.email "t.brown!!!!!!!"
 RUN git config --global user.name "theoesque"
 
-RUN git clone https://theoesque:7uryR0ad!234!@bitbucket.org/theoesque/lstf.git
+RUN git clone https://theoesque:!!!!@bitbucket.org/theoesque/lstf.git
 
 WORKDIR /server/lstf
 RUN mkdir -p /server/lstf/uploads
