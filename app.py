@@ -1,54 +1,104 @@
-# Socket server in python using select function
- 
-import socket, select
-  
-if __name__ == "__main__":
-      
-    CONNECTION_LIST = []    # list of socket clients
-    RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
-    PORT = 8888
-         
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # this has no effect, why ?
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(("0.0.0.0", PORT))
-    server_socket.listen(10)
- 
-    # Add server socket to the list of readable connections
-    CONNECTION_LIST.append(server_socket)
- 
-    print "Chat server started on port " + str(PORT)
- 
-    while 1:
-        # Get the list sockets which are ready to be read through select
-        read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
- 
-        for sock in read_sockets:
-             
-            #New connection
-            if sock == server_socket:
-                # Handle the case in which there is a new connection recieved through server_socket
-                sockfd, addr = server_socket.accept()
-                CONNECTION_LIST.append(sockfd)
-                print "Client (%s, %s) connected" % addr
-                 
-            #Some incoming message from a client
-            else:
-                # Data recieved from client, process it
-                try:
-                    #In Windows, sometimes when a TCP program closes abruptly,
-                    # a "Connection reset by peer" exception will be thrown
-                    data = sock.recv(RECV_BUFFER)
-                    # echo back the client message
-                    if data:
-                        sock.send('OK ... ' + data)
-                 
-                # client disconnected, so remove from socket list
-                except:
-                    broadcast_data(sock, "Client (%s, %s) is offline" % addr)
-                    print "Client (%s, %s) is offline" % addr
-                    sock.close()
-                    CONNECTION_LIST.remove(sock)
-                    continue
-         
-    server_socket.close()
+
+import os
+import main
+from flask import Flask, render_template, request
+
+import numpy as np
+import os
+import six.moves.urllib as urllib
+import sys
+import tarfile
+import tensorflow as tf
+import zipfile
+
+from collections import defaultdict
+from io import StringIO
+from matplotlib import pyplot as plt
+from PIL import Image
+
+# requires path to OBJRec API
+sys.path.append("/tensorflow/models/research")
+sys.path.append("/tensorflow/models/research/object_detection")
+
+from object_detection.utils import ops as utils_op
+
+from utils import label_map_util
+from utils import visualization_utils as vis_utils
+
+#Path to frozen detection graph
+PATH_TO_FROZEN_GRAPH = "frozen_inference_graph_face.pb"
+
+# List of strings that is used to add correct label for each box
+PATH_TO_LABELS = "face_label_map.pbtxt"
+
+NUM_CLASSES = 1
+
+# Load Graph
+detection_graph = tf.Graph()
+with detection_graph.as_default():
+    od_graph_def = tf.GraphDef()
+    with tf.gfile.GFile(PATH_TO_FROZEN_GRAPH, 'rb') as fid:
+        serialized_graph = fid.read()
+        od_graph_def.ParseFromString(serialized_graph)
+        tf.import_graph_def(od_graph_def, name='')
+
+        
+label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
+category_index = label_map_util.create_category_index(categories)
+
+IMAGE_SIZE = (12, 8)
+
+app = Flask(__name__)
+
+
+
+UPLOAD_FOLDER = os.path.basename('uploads')
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+
+@app.route('/')
+
+def hello_world():
+
+    return render_template('index.html')
+
+
+
+@app.route('/upload', methods=['POST'])
+
+def upload_file():
+
+    file = request.files['image']
+
+    image = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+
+	# the array based representation of the image will be used later in order to prepare the
+	# result image with boxes and labels on it.
+    image_np = load_image_into_numpy_array(image)
+	# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+    image_np_expanded = np.expand_dims(image_np, axis=0)
+	# Actual detection.
+    output_dict = run_inference_for_single_image(image_np, detection_graph)
+	# Visualization of the results of a detection.
+    vis_util.visualize_boxes_and_labels_on_image_array(
+		image_np,
+		output_dict['detection_boxes'],
+		output_dict['detection_classes'],
+		output_dict['detection_scores'],
+		category_index,
+		instance_masks=output_dict.get('detection_masks'),
+		use_normalized_coordinates=True,
+		line_thickness=8)
+    plt.figure(figsize=IMAGE_SIZE)
+    plt.imshow(image_np)    
+
+    # add your custom code to check that the uploaded file is a valid image and not a malicious file (out-of-scope for this post)
+
+    file.save(f)
+
+
+
+    return render_template('index.html')
