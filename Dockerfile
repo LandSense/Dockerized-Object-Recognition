@@ -14,6 +14,7 @@ FROM "tensorflow:latest"
 #RUN pip install jupyter
 #RUN pip install matplotlib
 RUN pip install flask
+RUN apt-get install -y nano
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python-tk
 
 #RUN git clone https://github.com/tensorflow/models.git /tensorflow/models
