@@ -1,6 +1,6 @@
 import os
 #import main
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 
 import numpy as np
 import os
@@ -57,6 +57,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = os.path.basename('uploads')
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 def load_image_into_numpy_array(image):
   (im_width, im_height) = image.size
@@ -121,14 +122,15 @@ def hello_world():
 def upload_file():
 
     file = request.files['image']
-
-    image = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
+    # need to add code for handling othe file formats
+    filename = os.path.join(app.config['UPLOAD_FOLDER'], 'image.jpeg')
+    file.save(filename)
+    image = Image.open(filename)
 	# the array based representation of the image will be used later in order to prepare the
 	# result image with boxes and labels on it.
     image_np = load_image_into_numpy_array(image) #TODO: Image is currently passed in as unicode,need to change this
 	# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-#    image_np_expanded = np.expand_dims(image_np, axis=0)
+    image_np_expanded = np.expand_dims(image_np, axis=0)
 	# Actual detection.
 #    output_dict = run_inference_for_single_image(image_np, detection_graph)
 	# Visualization of the results of a detection.
@@ -150,7 +152,8 @@ def upload_file():
 
 
 
-#    return render_template('index.html')
+    #return render_template('index.html')
+    return send_file(filename, mimetype='image/jpeg')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
