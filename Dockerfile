@@ -13,7 +13,8 @@ FROM "tensorflow:latest"
 #RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python-tk
 #RUN pip install jupyter
 #RUN pip install matplotlib
-#RUN pip install flask
+RUN pip install flask
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python-tk
 
 #RUN git clone https://github.com/tensorflow/models.git /tensorflow/models
 
@@ -42,9 +43,10 @@ COPY frozen_inference_graph_face.pb /server/frozen_inference_graph_face.pb
 COPY face_label_map.pbtxt /server/face_label_map.pbtxt
 COPY main.py /server/main.py
 COPY app.py /server/app.py
-COPY index.html /server/index.html
+COPY templates /server/templates
 RUN mkdir -p /server/uploads
 
 WORKDIR /server/
-CMD ["export", "FLASK_APP=app.py"]
-CMD ["flask", "run"]
+#CMD ["export", "FLASK_APP=app.py"]
+#CMD ["flask", "run"]
+CMD ["python", "app.py"]
