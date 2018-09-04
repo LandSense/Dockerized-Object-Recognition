@@ -113,6 +113,10 @@ def run_inference_for_single_image(image, graph):
 @app.route('/')
 
 def hello_world():
+    #delete any old images from folder
+    filename = os.path.join(app.config['UPLOAD_FOLDER'], 'image.jpeg')
+    if os.path.isfile(filename):
+        os.remove(filename)
     return render_template('index.html')
 
 
@@ -120,15 +124,22 @@ def hello_world():
 @app.route('/upload', methods=['POST'])
 
 def upload_file():
-
-    file = request.files['image']
-    # need to add code for handling othe file formats
+    
+    file = None
+    try:
+        file = request.files['image']
+    except:
+        return render_template('NoImage.html')
+	# need to add code for handling othe file formats
     filename = os.path.join(app.config['UPLOAD_FOLDER'], 'image.jpeg')
+	#delete any old images from folder
+    if os.path.isfile(filename):
+        os.remove(filename)
     file.save(filename)
     image = Image.open(filename)
 	# the array based representation of the image will be used later in order to prepare the
 	# result image with boxes and labels on it.
-    image_np = load_image_into_numpy_array(image) #TODO: Image is currently passed in as unicode,need to change this
+    image_np = load_image_into_numpy_array(image)
 	# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
 	# Actual detection.
@@ -147,8 +158,6 @@ def upload_file():
     plt.imshow(image_np)
 	# Edits to save image image for return    
     plt.savefig(filename)
-
-#    file.save(f)
 
 
 
