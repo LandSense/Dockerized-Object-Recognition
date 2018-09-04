@@ -125,7 +125,6 @@ def hello_world():
 
 def upload_file():
     
-    file = None
     try:
         file = request.files['image']
     except:
