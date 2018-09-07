@@ -1,6 +1,6 @@
 import os
 #import main
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 
 import numpy as np
 import os
@@ -9,6 +9,7 @@ import sys
 import tarfile
 import tensorflow as tf
 import zipfile
+import json
 
 from collections import defaultdict
 from io import StringIO
@@ -144,8 +145,9 @@ def upload_file():
 	# Actual detection.
     output_dict = run_inference_for_single_image(image_np, detection_graph)
 	# Visualization of the results of a detection.
-    vis_utils.visualize_boxes_and_labels_on_image_array(
-		image_np,
+    if output_dict['num_detections'] >= 1:
+        vis_utils.visualize_boxes_and_labels_on_image_array(
+	    	image_np,
 		output_dict['detection_boxes'],
 		output_dict['detection_classes'],
 		output_dict['detection_scores'],
@@ -153,15 +155,27 @@ def upload_file():
 		instance_masks=output_dict.get('detection_masks'),
 		use_normalized_coordinates=True,
 		line_thickness=8)
-    plt.figure(figsize=IMAGE_SIZE)
-    plt.imshow(image_np)
+        plt.figure(figsize=IMAGE_SIZE)
+        plt.imshow(image_np)
 	# Edits to save image image for return    
-    plt.savefig(filename)
-
-
-
-    #return render_template('index.html')
-    return send_file(filename, mimetype='image/jpeg')
+        plt.savefig(filename)
+        response = send_file(filename, mimetype='image/jpeg')
+        d_num_d = output_dict['num_detections']
+        d_num_djson = json.dumps(d_num_d)
+        d_boxes = output_dict['detection_boxes'].tolist()
+        d_boxesjson = json.dumps(d_boxes)
+        d_classes = output_dict['detection_classes'].tolist()
+        d_classesjson = json.dumps(d_classes)
+        d_scores = output_dict['detection_scores'].tolist()
+        d_scoresjson = json.dumps(d_scores)
+        #response.headers['number of detections'] = 'number of detections {}, boxes in image {}, classes {}, confidence scores {}'.format(d_num_djson,d_boxesjson,d_classesjson,d_scoresjson)
+        response.headers['number_of_detections'] = d_num_djson
+        response.headers['boxes_in_image'] = d_boxesjson
+        response.headers['classes'] = d_classesjson
+        response.headers['confidence_scores'] = d_scoresjson
+        return response
+    else:
+        return 'No Faces or Number Plates found in this image'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

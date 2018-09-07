@@ -15,7 +15,6 @@ RUN pip install tensorflow==1.4
 RUN apt-get install -y protobuf-compiler python-pil python-lxml
 RUN pip install jupyter
 RUN pip install matplotlib
-
 RUN git clone https://github.com/tensorflow/models.git /tensorflow/models
 
 
