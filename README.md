@@ -27,6 +27,14 @@ The response can also be programmatically recieved should the user wish to proce
 For example an image can be sent and recieved using curl:
 curl --output myimage.jpeg --form "image=@/home/theo/Documents/balls.jpeg" http://0.0.0.0:5000/upload
 
+# Header Response
+The Header response contains 4 custom headers in json format (number_of_detections, boxes_in_image, classes, confidence_scores). These contain ALL of the decteced areas in the image.
+The number of detections indicates the total number of areas in the image that match the class.
+The classess and confidence_scores have a 1 to 1 relationship i.e. the first number in the classes list matches the first confidence value.
+The confidence scores are ordered largest frist so post processing can discard all instances below a certain confidence value.
+The boxes in image contains lists of coordiantes, each coordiante list has a 1 to 1 relationship with the classes and confidence values.
+
+Therefore you can filter the bounding boxes by a desired confidence value, and match them to their class.
 
 #Intended improvements:
 
