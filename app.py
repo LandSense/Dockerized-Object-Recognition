@@ -168,7 +168,6 @@ def upload_file():
         d_classesjson = json.dumps(d_classes)
         d_scores = output_dict['detection_scores'].tolist()
         d_scoresjson = json.dumps(d_scores)
-        #response.headers['number of detections'] = 'number of detections {}, boxes in image {}, classes {}, confidence scores {}'.format(d_num_djson,d_boxesjson,d_classesjson,d_scoresjson)
         response.headers['number_of_detections'] = d_num_djson
         response.headers['boxes_in_image'] = d_boxesjson
         response.headers['classes'] = d_classesjson
