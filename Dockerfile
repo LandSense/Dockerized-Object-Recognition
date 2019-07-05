@@ -50,4 +50,6 @@ RUN mkdir -p /server/uploads
 WORKDIR /server/
 #CMD ["export", "FLASK_APP=app.py"]
 #CMD ["flask", "run"]
+#Needed the following chmod for Windows
+RUN chmod 644 app.py
 CMD ["python", "app.py"]
